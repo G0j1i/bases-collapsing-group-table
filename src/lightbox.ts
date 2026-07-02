@@ -22,12 +22,15 @@ const formatBytes = (n: number): string => {
 // A minimal full-screen image viewer for the cards view: prev/next (arrows,
 // side buttons, swipe, keys), close (Esc, double-click, swipe-down, outside
 // click), and a fade-in info box at the top-right. Self-contained — appended to
-// document.body and torn down on close, no Component needed.
+// the active document's body and torn down on close, no Component needed.
 export const openLightbox = (app: App, items: LightboxItem[], start: number): void => {
   if (items.length === 0) return
   let index = Math.max(0, Math.min(start, items.length - 1))
 
-  const overlay = document.body.createDiv('bcgt-lightbox')
+  // Use activeDocument (not the global `document`) so it works in popout windows;
+  // capture it once so open and close target the same document.
+  const doc = activeDocument
+  const overlay = doc.body.createDiv('bcgt-lightbox')
   const img = overlay.createEl('img', { cls: 'bcgt-lightbox-img', attr: { draggable: 'false' } })
   const info = overlay.createDiv('bcgt-lightbox-info')
 
@@ -90,11 +93,11 @@ export const openLightbox = (app: App, items: LightboxItem[], start: number): vo
     }
   }
   const close = (): void => {
-    document.removeEventListener('keydown', onKey)
+    doc.removeEventListener('keydown', onKey)
     overlay.remove()
   }
 
-  document.addEventListener('keydown', onKey)
+  doc.addEventListener('keydown', onKey)
   prevBtn.addEventListener('click', (e) => {
     e.stopPropagation()
     go(-1)

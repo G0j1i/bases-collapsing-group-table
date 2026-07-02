@@ -2,7 +2,10 @@ import { App, Component, MarkdownRenderer, Modal } from 'obsidian'
 
 // Bundled release notes (Markdown). Kept in the plugin so the "what's new"
 // popup needs no network. Newest first.
-export const CHANGELOG = `## 0.8.0
+export const CHANGELOG = `## 0.8.1
+- Image viewer now uses \`activeDocument\` so it works correctly in popout windows. No behaviour change in the main window.
+
+## 0.8.0
 - **Image viewer (lightbox)** for the cards view — click an image-file card (png/jpg/gif/…) to open a full-screen viewer.
   - Prev/next via ← → buttons, arrow keys, or swipe; wraps through every image card in the view.
   - Close with double-click, Esc, swipe-down, click outside, or ✕.
