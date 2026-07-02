@@ -98,6 +98,13 @@ The **Collapsing group cards** view renders entries as cards (cover image + titl
 
 The cover and filename are clickable to open the note.
 
+### Image viewer
+Cards whose **file is an image** (`png`, `jpg`, `jpeg`, `gif`, `webp`, `svg`, …) open a full-screen viewer when clicked; note cards open the note as usual. In the viewer:
+
+- **Prev / next** — the **←** / **→** buttons, arrow keys, or a horizontal swipe; it wraps through every image card in the view.
+- **Close** — double-click, **Esc**, swipe down, click outside the image, or the **✕** button.
+- **Info box** (top-right, fades in on hover) — filename, a position counter, the pixel **dimensions**, and the **file size**.
+
 ### Card badges
 Flag up to **4 columns** as badges. When a card's value for that column is **truthy** (checked box, non-empty text, non-zero number, non-empty list), a coloured pill appears at the card's **top-right** showing a slot symbol and the column name — e.g. a `read` checkbox shows `★ read`. Each of the four slots has a **fixed position, symbol, and colour** (① ★ ② ✓ ③ ◆ ④ ●), so a column always sits in the same spot across every card; a slot with no value leaves its place blank rather than shifting the others.
 

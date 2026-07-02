@@ -2,6 +2,7 @@ import { BasesEntry, BasesPropertyId, DateValue, setIcon, TFile, Value } from 'o
 import { buildGroupTree, cleanLabel, groupByNames, nodeTotal, type TreeNode } from './group-tree'
 import type { BuildTableArgs } from './build-table'
 import { formatDate } from './format-date'
+import { openLightbox, type LightboxField, type LightboxItem } from './lightbox'
 
 // Card-specific config — our own options (config.get/getAsPropertyId) plus the
 // built-in Cards view's top-level fields (image/cardSize/imageAspectRatio) so a
@@ -21,6 +22,23 @@ const SEP = '/'
 // One fixed symbol per badge slot (slot 1..4), so slots are distinguishable at
 // a glance and each column keeps a stable identity across cards.
 const BADGE_SYMBOLS = ['★', '✓', '◆', '●']
+
+// File extensions treated as viewable images: a card backed by one of these
+// opens the lightbox on click; other files (notes) open normally.
+const IMAGE_EXTS = new Set([
+  'png',
+  'jpg',
+  'jpeg',
+  'gif',
+  'webp',
+  'bmp',
+  'svg',
+  'avif',
+  'tiff',
+  'tif',
+  'ico',
+  'heic',
+])
 
 // Renders the grouped data as collapsible card sections. Shares buildGroupTree
 // (tree + relationship maps) with the table; the fold engine mirrors the table's
@@ -218,6 +236,21 @@ const buildCards = (container: HTMLElement, args: BuildTableArgs): void => {
     }
   }
 
+  // Images across all rendered cards, in display order — the viewer pages
+  // through these. Filled as cards render (see renderCard).
+  const lightboxItems: LightboxItem[] = []
+  // The card's field values as plain strings, for the viewer's info box.
+  const lightboxFields = (entry: BasesEntry): LightboxField[] => {
+    const out: LightboxField[] = []
+    for (const col of columns) {
+      if (col === 'file.name' || col === imageProp) continue
+      const v = valueOf(entry, col)
+      if (v === null) continue
+      out.push({ label: config.getDisplayName(col), value: v.toString() })
+    }
+    return out
+  }
+
   // ---- a single card ----
   const renderCard = (grid: HTMLElement, entry: BasesEntry): void => {
     const card = grid.createDiv('bcgt-card')
@@ -249,11 +282,6 @@ const buildCards = (container: HTMLElement, args: BuildTableArgs): void => {
         imgBox.addClass('bcgt-card-img-fixed')
         imgBox.style.setProperty('--ar', String(aspect))
       }
-      // The cover opens the note, like the title.
-      if (file) {
-        imgBox.addClass('bcgt-card-img-link')
-        imgBox.addEventListener('click', openFile)
-      }
       // Prefer building our own <img> from the resolved value — a clean, direct
       // child so the aspect-box and object-fit actually apply. If resolution
       // fails, fall back to Obsidian's renderTo (e.g. an image() formula value)
@@ -261,6 +289,28 @@ const buildCards = (container: HTMLElement, args: BuildTableArgs): void => {
       const src = cardImageSrc(entry)
       if (src) {
         imgBox.createEl('img', { attr: { src } })
+        const isImageFile = file ? IMAGE_EXTS.has(file.extension.toLowerCase()) : false
+        if (isImageFile) {
+          // The card *is* an image file → the whole cover opens the viewer,
+          // which pages through every image card in display order.
+          const idx = lightboxItems.length
+          lightboxItems.push({
+            src,
+            title: file ? file.basename : '',
+            fields: lightboxFields(entry),
+            size: file ? file.stat.size : undefined,
+          })
+          imgBox.addClass('bcgt-card-img-link')
+          imgBox.addEventListener('click', (e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            openLightbox(app, lightboxItems, idx)
+          })
+        } else if (file) {
+          // A note with a cover → the cover just opens the note.
+          imgBox.addClass('bcgt-card-img-link')
+          imgBox.addEventListener('click', openFile)
+        }
       } else {
         const v = valueOf(entry, imageProp)
         if (v) {
@@ -277,6 +327,12 @@ const buildCards = (container: HTMLElement, args: BuildTableArgs): void => {
           imgBox.appendChild(img)
         } else {
           imgBox.empty()
+        }
+        // No resolvable src (e.g. an image() formula) — keep the cover opening
+        // the note, as before.
+        if (file) {
+          imgBox.addClass('bcgt-card-img-link')
+          imgBox.addEventListener('click', openFile)
         }
       }
     }

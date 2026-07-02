@@ -2,7 +2,14 @@ import { App, Component, MarkdownRenderer, Modal } from 'obsidian'
 
 // Bundled release notes (Markdown). Kept in the plugin so the "what's new"
 // popup needs no network. Newest first.
-export const CHANGELOG = `## 0.7.1
+export const CHANGELOG = `## 0.8.0
+- **Image viewer (lightbox)** for the cards view — click an image-file card (png/jpg/gif/…) to open a full-screen viewer.
+  - Prev/next via ← → buttons, arrow keys, or swipe; wraps through every image card in the view.
+  - Close with double-click, Esc, swipe-down, click outside, or ✕.
+  - Info box (top-right, fades in on hover): filename, a position counter, pixel dimensions, and file size.
+- Note cards still open the note on click (unchanged).
+
+## 0.7.1
 - Code cleanup: clear the review linter's type-safety warnings around date formatting and the column-width reader. No behaviour change.
 
 ## 0.7.0
