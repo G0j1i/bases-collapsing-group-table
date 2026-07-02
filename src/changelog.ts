@@ -2,7 +2,10 @@ import { App, Component, MarkdownRenderer, Modal } from 'obsidian'
 
 // Bundled release notes (Markdown). Kept in the plugin so the "what's new"
 // popup needs no network. Newest first.
-export const CHANGELOG = `## 0.8.1
+export const CHANGELOG = `## 0.8.2
+- Update the plugin description to mention the cards view, card badges, and image viewer.
+
+## 0.8.1
 - Image viewer now uses \`activeDocument\` so it works correctly in popout windows. No behaviour change in the main window.
 
 ## 0.8.0
